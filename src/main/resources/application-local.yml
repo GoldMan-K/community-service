@@ -17,7 +17,7 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        format_sql: true
+        format_sql: truee
     show-sql: true
     open-in-view: false
 
@@ -54,3 +54,6 @@ logging:
 
 internal:
   api-key: local-internal-api-key
+member-service:
+  base-url: ${MEMBER_SERVICE_URL:http://localhost:8082}
+  nickname-path: ${MEMBER_NICKNAME_PATH:/internal/members/nicknames}

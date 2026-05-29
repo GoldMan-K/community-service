@@ -36,17 +36,25 @@ public class PostController {
     @Operation(summary = "게시글 목록 조회 (지역·카테고리·키워드 필터)")
     @GetMapping
     public ResponseEntity<Page<PostDto.Summary>> getPosts(
+            @Parameter(description = "Gateway가 주입하는 회원 ID (비로그인 시 미전달)")
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @RequestParam(required = false) String regionCode,
             @RequestParam(required = false) String categoryCode,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(postService.getPosts(regionCode, categoryCode, keyword, pageable));
+        return ResponseEntity.ok(
+                postService.getPosts(regionCode, categoryCode, keyword, pageable, memberId));
     }
 
-    @Operation(summary = "게시글 상세 조회 + 조회수 증가")
+    @Operation(summary = "게시글 상세 조회 + 조회수 증가 (incrementView=false 시 조회수 미증가)")
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto.Response> getPost(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.getPost(id));
+    public ResponseEntity<PostDto.Response> getPost(
+            @Parameter(description = "Gateway가 주입하는 회원 ID (비로그인 시 미전달)")
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+            @PathVariable Long id,
+            @Parameter(description = "false 이면 조회수를 증가시키지 않음 (편집/재조회 용도). 기본 true")
+            @RequestParam(value = "incrementView", required = false, defaultValue = "true") boolean incrementView) {
+        return ResponseEntity.ok(postService.getPost(id, memberId, incrementView));
     }
 
     @Operation(summary = "게시글 작성")
@@ -76,9 +84,34 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "[ADMIN] 삭제 게시글 복구")
+    @Operation(summary = "내 휴지통 목록 조회 (삭제된 글만)")
+    @GetMapping("/me/trash")
+    public ResponseEntity<Page<PostDto.TrashSummary>> getMyTrashPosts(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(postService.getMyTrashPosts(memberId, pageable));
+    }
+
+    @Operation(summary = "삭제 게시글 복구 (작성자 또는 관리자)")
     @PostMapping("/{id}/restore")
-    public ResponseEntity<PostDto.Response> restorePost(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.restorePost(id));
+    public ResponseEntity<PostDto.Response> restorePost(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @RequestHeader(value = "X-Member-Role", required = false) String memberRole,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(postService.restorePost(id, memberId, isAdmin(memberRole)));
+    }
+
+    @Operation(summary = "삭제 게시글 영구삭제 (작성자 또는 관리자, del_yn=Y 플래그)")
+    @DeleteMapping("/{id}/hard")
+    public ResponseEntity<Void> hardDeletePost(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @RequestHeader(value = "X-Member-Role", required = false) String memberRole,
+            @PathVariable Long id) {
+        postService.hardDeletePost(id, memberId, isAdmin(memberRole));
+        return ResponseEntity.noContent().build();
+    }
+
+    private boolean isAdmin(String memberRole) {
+        return memberRole != null && "ADMIN".equalsIgnoreCase(memberRole.trim());
     }
 }

@@ -5,7 +5,7 @@ spring:
   application:
     name: community-service
   profiles:
-    default: local
+    default: local # local, dev , prod
 
   data:
     redis:
@@ -32,9 +32,11 @@ spring:
     consumer:
       group-id: community-service-group
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
         spring.json.use.type.headers: false
 
@@ -46,3 +48,6 @@ management:
 
 internal:
   api-key: ${INTERNAL_API_KEY:local-internal-api-key}
+member-service:
+  base-url: ${MEMBER_SERVICE_URL:http://localhost:8081}
+  nickname-path: ${MEMBER_NICKNAME_PATH:/internal/members/nicknames}

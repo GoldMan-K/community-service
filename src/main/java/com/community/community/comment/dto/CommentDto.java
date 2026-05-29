@@ -25,17 +25,25 @@ public class CommentDto {
             Long id,
             Long postId,
             Long writerMemberId,
+            String writerNickname,
             Long parentCommentId,
             Long mentionMemberId,
+            String mentionWriterNickname,
             String content,
             boolean isDeleted,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
         public static Response from(BoardComment c) {
+            return from(c, null, null);
+        }
+
+        public static Response from(BoardComment c,
+                                    String writerNickname,
+                                    String mentionWriterNickname) {
             return new Response(
-                    c.getId(), c.getPostId(), c.getWriterMemberId(),
-                    c.getParentCommentId(), c.getMentionMemberId(),
+                    c.getId(), c.getPostId(), c.getWriterMemberId(), writerNickname,
+                    c.getParentCommentId(), c.getMentionMemberId(), mentionWriterNickname,
                     c.getContent(), c.isDeleted(),
                     c.getCreatedAt(), c.getUpdatedAt());
         }

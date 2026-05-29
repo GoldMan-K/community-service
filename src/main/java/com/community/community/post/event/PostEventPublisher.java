@@ -24,9 +24,20 @@ public class PostEventPublisher {
         send(KafkaTopics.POST_CREATED, String.valueOf(postId), PostCreatedEvent.of(postId, memberId));
     }
 
-    public void publishPostCommented(Long postId, Long commentId, Long memberId) {
+    public void publishPostCommented(Long postId,
+                                     Long commentId,
+                                     Long memberId,
+                                     Long postWriterMemberId,
+                                     Long parentCommentWriterMemberId) {
         send(KafkaTopics.POST_COMMENTED, String.valueOf(postId),
-                new PostCommentedEvent(postId, commentId, memberId, java.time.Instant.now()));
+                new PostCommentedEvent(
+                        postId,
+                        commentId,
+                        memberId,
+                        postWriterMemberId,
+                        parentCommentWriterMemberId,
+                        java.time.Instant.now()
+                ));
     }
 
     private void send(String topic, String key, Object payload) {

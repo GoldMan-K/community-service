@@ -68,6 +68,9 @@ public class BoardPost {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "del_yn", nullable = false, length = 1)
+    private String delYn = "N";
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardPostTag> tags = new ArrayList<>();
 
@@ -112,7 +115,12 @@ public class BoardPost {
         this.deletedAt = null;
     }
 
+    public void markHardDeleted() {
+        this.delYn = "Y";
+    }
+
     public boolean isDeleted() { return this.deletedAt != null || "DELETED".equals(this.status); }
+    public boolean isHardDeleted() { return "Y".equals(this.delYn); }
 
     // Getters
     public Long getId()               { return id; }
@@ -130,6 +138,7 @@ public class BoardPost {
     public LocalDateTime getCreatedAt(){ return createdAt; }
     public LocalDateTime getUpdatedAt(){ return updatedAt; }
     public LocalDateTime getDeletedAt(){ return deletedAt; }
+    public String getDelYn()         { return delYn; }
     public List<BoardPostTag>   getTags()   { return tags; }
     public List<BoardPostImage> getImages() { return images; }
 }
