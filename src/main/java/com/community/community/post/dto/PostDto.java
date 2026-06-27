@@ -3,6 +3,7 @@ package com.community.community.post.dto;
 import com.community.community.post.domain.BoardPost;
 import com.community.community.post.domain.BoardPostImage;
 import com.community.community.post.domain.BoardPostTag;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +26,11 @@ public class PostDto {
             String regionCode,
             String categoryCode,
             String subCategoryCode,
+            @Schema(description = "상단고정 여부(Y/N). pinned_yn도 허용")
+            @JsonAlias("pinned_yn")
+            String pinnedYn,
+            @Schema(description = "상단고정 여부(boolean). true=Y, false=N")
+            Boolean pinned,
             List<String> tags,
             List<String> imageUrls
     ) {}
@@ -38,6 +44,11 @@ public class PostDto {
             String regionCode,
             String categoryCode,
             String subCategoryCode,
+            @Schema(description = "상단고정 여부(Y/N). pinned_yn도 허용")
+            @JsonAlias("pinned_yn")
+            String pinnedYn,
+            @Schema(description = "상단고정 여부(boolean). true=Y, false=N")
+            Boolean pinned,
             List<String> tags,
             List<String> imageUrls
     ) {}
@@ -73,6 +84,14 @@ public class PostDto {
         /** 프론트 호환용 alias: isBookmarked */
         @JsonProperty("isBookmarked")
         public boolean isBookmarked() { return bookmarkedByMe; }
+
+        /** 프론트 호환용 alias: pinned_yn */
+        @JsonProperty("pinned_yn")
+        public String pinnedYnSnake() { return pinnedYn; }
+
+        /** 프론트 호환용 alias: pinned */
+        @JsonProperty("pinned")
+        public boolean pinned() { return "Y".equalsIgnoreCase(pinnedYn); }
 
         public static Response from(BoardPost post) {
             return from(post, false, false);
@@ -144,6 +163,14 @@ public class PostDto {
         /** 프론트 호환용 alias: isBookmarked */
         @JsonProperty("isBookmarked")
         public boolean isBookmarked() { return bookmarkedByMe; }
+
+        /** 프론트 호환용 alias: pinned_yn */
+        @JsonProperty("pinned_yn")
+        public String pinnedYnSnake() { return pinnedYn; }
+
+        /** 프론트 호환용 alias: pinned */
+        @JsonProperty("pinned")
+        public boolean pinned() { return "Y".equalsIgnoreCase(pinnedYn); }
 
         public static Summary from(BoardPost post) {
             return from(post, false, false, List.of(), List.of());

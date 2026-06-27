@@ -58,9 +58,11 @@ public class PostService {
 
     @Transactional
     public PostDto.Response createPost(Long memberId, PostDto.CreateRequest req) {
+        String pinnedYn = resolveCreatePinnedYn(req.pinnedYn(), req.pinned());
+
         BoardPost post = new BoardPost(
                 memberId, req.title(), req.content(),
-                req.regionCode(), req.categoryCode(), req.subCategoryCode());
+                req.regionCode(), req.categoryCode(), req.subCategoryCode(), pinnedYn);
 
         postRepository.save(post);
         syncTags(post, req.tags());
@@ -137,8 +139,9 @@ public class PostService {
         String newRegion   = req.regionCode()   != null ? req.regionCode()   : post.getRegionCode();
         String newCategory = req.categoryCode() != null ? req.categoryCode() : post.getCategoryCode();
         String newSubCat   = req.subCategoryCode() != null ? req.subCategoryCode() : post.getSubCategoryCode();
+        String newPinnedYn = resolveUpdatePinnedYn(req.pinnedYn(), req.pinned(), post.getPinnedYn());
 
-        post.update(newTitle, newContent, newRegion, newCategory, newSubCat);
+        post.update(newTitle, newContent, newRegion, newCategory, newSubCat, newPinnedYn);
 
         boolean hasTagReplace = req.tags() != null;
         boolean hasImageReplace = req.imageUrls() != null;
@@ -296,5 +299,33 @@ public class PostService {
             return Collections.emptyMap();
         }
         return memberNicknameService.resolveNicknames(memberIds);
+    }
+
+    private String resolveCreatePinnedYn(String pinnedYn, Boolean pinned) {
+        if (pinnedYn != null) {
+            return normalizePinnedYn(pinnedYn);
+        }
+        if (pinned != null) {
+            return pinned ? "Y" : "N";
+        }
+        return "N";
+    }
+
+    private String resolveUpdatePinnedYn(String pinnedYn, Boolean pinned, String currentPinnedYn) {
+        if (pinnedYn != null) {
+            return normalizePinnedYn(pinnedYn);
+        }
+        if (pinned != null) {
+            return pinned ? "Y" : "N";
+        }
+        return currentPinnedYn;
+    }
+
+    private String normalizePinnedYn(String pinnedYn) {
+        String normalized = pinnedYn.trim().toUpperCase();
+        if (!"Y".equals(normalized) && !"N".equals(normalized)) {
+            throw new IllegalArgumentException("pinnedYn은 Y 또는 N 이어야 합니다.");
+        }
+        return normalized;
     }
 }

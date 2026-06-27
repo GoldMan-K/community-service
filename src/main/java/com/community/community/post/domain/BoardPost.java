@@ -81,22 +81,35 @@ public class BoardPost {
     protected BoardPost() {}
 
     public BoardPost(Long writerMemberId, String title, String content,
-                     String regionCode, String categoryCode, String subCategoryCode) {
+                     String regionCode, String categoryCode, String subCategoryCode, String pinnedYn) {
         this.writerMemberId   = writerMemberId;
         this.title            = title;
         this.content          = content;
         this.regionCode       = regionCode;
         this.categoryCode     = categoryCode;
         this.subCategoryCode  = subCategoryCode;
+        applyPinnedYn(pinnedYn);
     }
 
     public void update(String title, String content,
-                       String regionCode, String categoryCode, String subCategoryCode) {
+                       String regionCode, String categoryCode, String subCategoryCode, String pinnedYn) {
         this.title           = title;
         this.content         = content;
         this.regionCode      = regionCode;
         this.categoryCode    = categoryCode;
         this.subCategoryCode = subCategoryCode;
+        applyPinnedYn(pinnedYn);
+    }
+
+    private void applyPinnedYn(String pinnedYn) {
+        if (pinnedYn == null) {
+            this.pinnedYn = "N";
+            return;
+        }
+        if (!"Y".equals(pinnedYn) && !"N".equals(pinnedYn)) {
+            throw new IllegalArgumentException("pinnedYn은 Y 또는 N 이어야 합니다.");
+        }
+        this.pinnedYn = pinnedYn;
     }
 
     public void softDelete() {
