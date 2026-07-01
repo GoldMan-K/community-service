@@ -1,11 +1,11 @@
 server:
-  port: 8080
+  port: 8083
 
 spring:
   application:
     name: community-service
   profiles:
-    default: local # local, dev , prod
+    default: prod # local, dev , prod
 
   data:
     redis:
